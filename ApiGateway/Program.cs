@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Ocelot.Cache.CacheManager;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using System.Text;
@@ -38,7 +39,9 @@ namespace ApiGateway
             });
 
             // add ocelot to DI container
-            builder.Services.AddOcelot(builder.Configuration);
+            builder.Services
+                .AddOcelot(builder.Configuration)
+                .AddCacheManager(settings => settings.WithDictionaryHandle());
 
             var app = builder.Build();
 
