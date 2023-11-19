@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using System.Text;
 
 namespace ApiGateway
 {
@@ -15,12 +18,34 @@ namespace ApiGateway
 
             builder.Host.ConfigureLogging(log => log.AddConsole());
 
+            // configure authentication
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x => 
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("Jwt:PrivateKey"))),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
             // add ocelot to DI container
             builder.Services.AddOcelot(builder.Configuration);
 
             var app = builder.Build();
 
             app.MapGet("/", () => "Hello World!");
+
+            app.UseAuthentication();
+            // app.UseAuthorization();
 
             // add ocelot middlaware
             app.UseOcelot().Wait();

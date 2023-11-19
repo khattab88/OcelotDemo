@@ -1,4 +1,6 @@
 
+using Auth.Services;
+
 namespace Auth
 {
     public class Program
@@ -8,8 +10,10 @@ namespace Auth
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddScoped<IAuthService, AuthService>();
 
             builder.Services.AddControllers();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
